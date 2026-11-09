@@ -397,6 +397,9 @@
       <span>四年級數學・三角形測驗 教師後台資料庫</span>
     </div>
     <div class="header-nav">
+      <button class="btn btn-danger" onclick="resetAllData()">
+        🧹 數據歸零重整
+      </button>
       <button class="btn btn-light" onclick="openCloudModal()">
         ⚙️ 雲端資料庫設定
       </button>
@@ -1012,14 +1015,22 @@
       document.body.removeChild(link);
     }
 
-    // 清空資料庫
-    function clearDatabase() {
-      if (confirm('確定要清空所有學生的測驗紀錄嗎？此動作無法復原！')) {
+    // 數據歸零重整
+    function resetAllData() {
+      if (confirm('確定要將所有作答紀錄全部歸零重整嗎？\n（此動作會清空目前所有的測試數據，恢復初始空白狀態）')) {
         records = [];
         localStorage.removeItem(DB_KEY);
         calculateStats();
         renderTable();
+        // 還原單題診斷面板
+        document.getElementById('detailTitle').textContent = '點擊上方題號查看「單題錯題診斷與常犯錯誤」';
+        document.getElementById('detailContent').innerHTML = '請點擊上方排行榜中的任一題目，即可在此查看全班學生在該題的錯誤答案統計、題目原圖與解析！';
+        alert('✅ 所有測驗數據已成功歸零重整！目前狀態乾淨，隨時可進行正式測驗。');
       }
+    }
+
+    function clearDatabase() {
+      resetAllData();
     }
 
     // 雲端設定 Modal 操作
