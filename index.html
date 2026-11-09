@@ -832,7 +832,7 @@
         </div>
         <div class="input-row">
           <span>∠☆ ＝ (</span>
-          <input type="text" inputmode="numeric" class="ipad-input" id="q1_input" placeholder="請填度數" oninput="updateProgress()">
+          <input type="text" inputmode="numeric" class="ipad-input" id="q1_input" placeholder="" oninput="updateProgress()">
           <span class="input-unit">) 度</span>
         </div>
         <div class="answer-feedback" id="feedback-q1"></div>
@@ -848,26 +848,25 @@
           </div>
         </div>
         <div class="diagram-container">
-          <svg width="300" height="130" viewBox="0 0 300 130">
-            <!-- 三條線段：第一條短，二三條等長 -->
-            <line x1="90" y1="25" x2="210" y2="25" stroke="#475569" stroke-width="6" stroke-linecap="round"/>
-            <text x="40" y="30" font-size="14" font-weight="bold" fill="#64748b">線段 1</text>
-            
-            <line x1="50" y1="65" x2="250" y2="65" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
-            <text x="40" y="70" font-size="14" font-weight="bold" fill="#1d4ed8">線段 2</text>
-            
-            <line x1="50" y1="105" x2="250" y2="105" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
-            <text x="40" y="110" font-size="14" font-weight="bold" fill="#1d4ed8">線段 3</text>
+          <svg width="280" height="130" viewBox="0 0 280 130">
+            <!-- 外框與三條不重疊線段：上方較短，下方兩條等長 -->
+            <rect x="15" y="10" width="250" height="110" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" rx="10"/>
+            <!-- 線段 1 (短) -->
+            <line x1="85" y1="35" x2="195" y2="35" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+            <!-- 線段 2 (長) -->
+            <line x1="45" y1="65" x2="235" y2="65" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+            <!-- 線段 3 (長，與線段2等長) -->
+            <line x1="45" y1="95" x2="235" y2="95" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
           </svg>
         </div>
         <div class="options-grid">
           <button type="button" class="option-btn" data-qid="q2" data-val="等腰" onclick="selectSingleOption('q2', '等腰', this)">
             <span class="opt-badge">A</span>
-            <span>等腰三角形（有兩條線段一樣長）</span>
+            <span>等腰三角形</span>
           </button>
           <button type="button" class="option-btn" data-qid="q2" data-val="正" onclick="selectSingleOption('q2', '正', this)">
             <span class="opt-badge">B</span>
-            <span>正三角形（三條線段都一樣長）</span>
+            <span>正三角形</span>
           </button>
         </div>
         <div class="answer-feedback" id="feedback-q2"></div>
@@ -888,12 +887,8 @@
             <span class="check-label">圖形 ①</span>
             <svg width="140" height="110" viewBox="0 0 140 110">
               <polygon points="70,15 25,95 115,95" fill="#f0fdf4" stroke="#16a34a" stroke-width="3.5" stroke-linejoin="round"/>
-              <!-- 兩腰等長記號 -->
-              <line x1="44" y1="52" x2="52" y2="58" stroke="#dc2626" stroke-width="2.5"/>
-              <line x1="88" y1="58" x2="96" y2="52" stroke="#dc2626" stroke-width="2.5"/>
             </svg>
             <div class="check-box-indicator" id="indicator_q3_1">✓</div>
-            <span style="font-size:0.9rem; color:#475569; font-weight:700;">兩邊等長</span>
           </div>
 
           <!-- 圖 2: 不等邊直角三角形 -->
@@ -905,7 +900,6 @@
               <polyline points="30,80 45,80 45,95" fill="none" stroke="#64748b" stroke-width="2"/>
             </svg>
             <div class="check-box-indicator" id="indicator_q3_2">✓</div>
-            <span style="font-size:0.9rem; color:#475569; font-weight:700;">三邊不等長</span>
           </div>
 
           <!-- 圖 3: 等腰鈍角三角形 -->
@@ -913,12 +907,8 @@
             <span class="check-label">圖形 ③</span>
             <svg width="140" height="110" viewBox="0 0 140 110">
               <polygon points="60,40 10,95 130,95" fill="#f0fdf4" stroke="#16a34a" stroke-width="3.5" stroke-linejoin="round"/>
-              <!-- 兩腰等長記號 -->
-              <line x1="32" y1="64" x2="38" y2="72" stroke="#dc2626" stroke-width="2.5"/>
-              <line x1="92" y1="72" x2="98" y2="64" stroke="#dc2626" stroke-width="2.5"/>
             </svg>
             <div class="check-box-indicator" id="indicator_q3_3">✓</div>
-            <span style="font-size:0.9rem; color:#475569; font-weight:700;">兩邊等長</span>
           </div>
         </div>
         <div class="answer-feedback" id="feedback-q3"></div>
@@ -935,9 +925,9 @@
         </div>
         <div class="input-row">
           <span>等腰三角形有</span>
-          <input type="text" inputmode="numeric" class="ipad-input" id="q4_1" style="min-width: 80px;" placeholder="幾條" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q4_1" style="min-width: 80px;" placeholder="" oninput="updateProgress()">
           <span class="input-unit">條邊相等，有</span>
-          <input type="text" inputmode="numeric" class="ipad-input" id="q4_2" style="min-width: 80px;" placeholder="幾個" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q4_2" style="min-width: 80px;" placeholder="" oninput="updateProgress()">
           <span class="input-unit">個角相等。</span>
         </div>
         <div class="answer-feedback" id="feedback-q4"></div>
@@ -954,11 +944,11 @@
         </div>
         <div class="input-row">
           <span>正三角形又稱為</span>
-          <input type="text" class="ipad-input" id="q5_1" style="min-width: 120px;" placeholder="等邊" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q5_1" style="min-width: 120px;" placeholder="" oninput="updateProgress()">
           <span class="input-unit">三角形，它有</span>
-          <input type="text" inputmode="numeric" class="ipad-input" id="q5_2" style="min-width: 80px;" placeholder="幾個" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q5_2" style="min-width: 80px;" placeholder="" oninput="updateProgress()">
           <span class="input-unit">個角相等，有</span>
-          <input type="text" inputmode="numeric" class="ipad-input" id="q5_3" style="min-width: 80px;" placeholder="幾條" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q5_3" style="min-width: 80px;" placeholder="" oninput="updateProgress()">
           <span class="input-unit">條邊等長。</span>
         </div>
         <div class="answer-feedback" id="feedback-q5"></div>
@@ -1005,12 +995,8 @@
         </div>
         <div class="input-row">
           <span>稱為：(</span>
-          <input type="text" class="ipad-input" id="q7_input" placeholder="請填角名稱" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q7_input" placeholder="" oninput="updateProgress()">
           <span class="input-unit">)</span>
-          <div style="display:flex; gap:8px; margin-left:10px;">
-            <button type="button" class="btn-secondary" style="padding:6px 14px; font-size:0.95rem;" onclick="setInputValue('q7_input', '頂角')">快捷填入：頂角</button>
-            <button type="button" class="btn-secondary" style="padding:6px 14px; font-size:0.95rem;" onclick="setInputValue('q7_input', '底角')">快捷填入：底角</button>
-          </div>
         </div>
         <div class="answer-feedback" id="feedback-q7"></div>
       </article>
@@ -1081,17 +1067,16 @@
         <div style="display:flex; flex-direction:column; gap:16px;">
           <div class="input-row">
             <span>① 左圖是一個(</span>
-            <input type="text" class="ipad-input" id="q9_1" placeholder="正或等邊" style="min-width: 120px;" oninput="updateProgress()">
+            <input type="text" class="ipad-input" id="q9_1" placeholder="" style="min-width: 120px;" oninput="updateProgress()">
             <span class="input-unit">)三角形。</span>
-            <span style="font-size: 0.9rem; color: #64748b;">(填正或等邊均可)</span>
           </div>
           <div class="input-row">
             <span>② 這個三角形的三個角分別是(</span>
-            <input type="text" inputmode="numeric" class="ipad-input" id="q9_2_1" style="min-width: 75px;" placeholder="度數" oninput="updateProgress()">
+            <input type="text" class="ipad-input" id="q9_2_1" style="min-width: 75px;" placeholder="" oninput="updateProgress()">
             <span class="input-unit">)度、(</span>
-            <input type="text" inputmode="numeric" class="ipad-input" id="q9_2_2" style="min-width: 75px;" placeholder="度數" oninput="updateProgress()">
+            <input type="text" class="ipad-input" id="q9_2_2" style="min-width: 75px;" placeholder="" oninput="updateProgress()">
             <span class="input-unit">)度、(</span>
-            <input type="text" inputmode="numeric" class="ipad-input" id="q9_2_3" style="min-width: 75px;" placeholder="度數" oninput="updateProgress()">
+            <input type="text" class="ipad-input" id="q9_2_3" style="min-width: 75px;" placeholder="" oninput="updateProgress()">
             <span class="input-unit">)度。</span>
           </div>
         </div>
@@ -1126,7 +1111,7 @@
         </div>
         <div class="input-row">
           <span>∠丙 ＝ (</span>
-          <input type="text" inputmode="numeric" class="ipad-input" id="q10_input" placeholder="請填度數" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q10_input" placeholder="" oninput="updateProgress()">
           <span class="input-unit">) 度</span>
         </div>
         <div class="answer-feedback" id="feedback-q10"></div>
@@ -1157,7 +1142,7 @@
         </div>
         <div class="input-row">
           <span>周長 ＝ (</span>
-          <input type="text" inputmode="numeric" class="ipad-input" id="q11_input" placeholder="請填周長" oninput="updateProgress()">
+          <input type="text" class="ipad-input" id="q11_input" placeholder="" oninput="updateProgress()">
           <span class="input-unit">) 公分</span>
         </div>
         <div class="answer-feedback" id="feedback-q11"></div>
@@ -1343,10 +1328,32 @@
       document.getElementById('progressFill').style.width = pct + '%';
     }
 
-    // 格式清理輔助
+    // 格式清理與中英數字標準化（支援中文數字如「兩、二、三、六十」與阿拉伯數字）
+    function cleanNum(s) {
+      if (!s) return '';
+      let str = String(s).trim().replace(/[度°公分cm條個邊角\s]/g, '').toLowerCase();
+      const numMap = {
+        '0': '0', '零': '0',
+        '1': '1', '一': '1',
+        '2': '2', '二': '2', '兩': '2',
+        '3': '3', '三': '3',
+        '4': '4', '四': '4',
+        '5': '5', '五': '5',
+        '6': '6', '六': '6',
+        '7': '7', '七': '7',
+        '8': '8', '八': '8',
+        '9': '9', '九': '9',
+        '10': '10', '十': '10',
+        '21': '21', '二十一': '21',
+        '60': '60', '六十': '60',
+        '115': '115', '一百一十五': '115'
+      };
+      return numMap[str] || str;
+    }
+
     function cleanStr(s) {
       if (!s) return '';
-      return String(s).replace(/[度°公分cm\s]/g, '').trim().toLowerCase();
+      return String(s).replace(/[度°公分cm條個邊角\s]/g, '').trim().toLowerCase();
     }
 
     // -------------------------------------------------------------
@@ -1369,12 +1376,11 @@
       const questionResults = {};
       const POINTS_PER_Q = 9; // 11 題，滿分 100 分 (9*10 + 10)
 
-      // Q1 對答
-      const q1Clean = cleanStr(userAnswers.q1);
-      const isQ1Correct = ANSWER_KEY.q1.correct.some(c => cleanStr(c) === q1Clean);
+      // Q1 對答 (60 / 六十)
+      const isQ1Correct = (cleanNum(userAnswers.q1) === '60');
       questionResults.q1 = {
         correct: isQ1Correct,
-        studentAnswer: userAnswers.q1 || '(未作答)',
+        studentAnswer: userAnswers.q1 ? userAnswers.q1 + ' 度' : '(未作答)',
         correctAnswer: ANSWER_KEY.q1.label,
         explain: ANSWER_KEY.q1.explain
       };
@@ -1402,9 +1408,9 @@
         explain: ANSWER_KEY.q3.explain
       };
 
-      // Q4 對答
-      const isQ4_1 = ['2', '二'].includes(userAnswers.q4[0]);
-      const isQ4_2 = ['2', '二', '兩'].includes(userAnswers.q4[1]);
+      // Q4 對答 (支援 2、二、兩)
+      const isQ4_1 = (cleanNum(userAnswers.q4[0]) === '2');
+      const isQ4_2 = (cleanNum(userAnswers.q4[1]) === '2');
       const isQ4Correct = isQ4_1 && isQ4_2;
       questionResults.q4 = {
         correct: isQ4Correct,
@@ -1413,10 +1419,10 @@
         explain: ANSWER_KEY.q4.explain
       };
 
-      // Q5 對答
-      const isQ5_1 = ['等邊'].includes(userAnswers.q5[0]);
-      const isQ5_2 = ['3', '三'].includes(userAnswers.q5[1]);
-      const isQ5_3 = ['3', '三'].includes(userAnswers.q5[2]);
+      // Q5 對答 (支援 等邊、3/三、3/三)
+      const isQ5_1 = (cleanStr(userAnswers.q5[0]) === '等邊');
+      const isQ5_2 = (cleanNum(userAnswers.q5[1]) === '3');
+      const isQ5_3 = (cleanNum(userAnswers.q5[2]) === '3');
       const isQ5Correct = isQ5_1 && isQ5_2 && isQ5_3;
       questionResults.q5 = {
         correct: isQ5Correct,
@@ -1435,7 +1441,7 @@
       };
 
       // Q7 對答
-      const isQ7Correct = userAnswers.q7 === '頂角';
+      const isQ7Correct = (cleanStr(userAnswers.q7) === '頂角');
       questionResults.q7 = {
         correct: isQ7Correct,
         studentAnswer: userAnswers.q7 || '(未作答)',
@@ -1452,21 +1458,20 @@
         explain: ANSWER_KEY.q8.explain
       };
 
-      // Q9 對答
-      const p1 = userAnswers.q9.part1;
+      // Q9 對答 (正/等邊、60/六十)
+      const p1 = cleanStr(userAnswers.q9.part1);
       const isP1 = ['正', '等邊'].includes(p1);
-      const isP2 = userAnswers.q9.angles.every(a => cleanStr(a) === '60');
+      const isP2 = userAnswers.q9.angles.every(a => cleanNum(a) === '60');
       const isQ9Correct = isP1 && isP2;
       questionResults.q9 = {
         correct: isQ9Correct,
-        studentAnswer: `① ${p1 || '?'}, ② ${userAnswers.q9.angles.join('°、')}°`,
+        studentAnswer: `① ${userAnswers.q9.part1 || '?'}, ② ${userAnswers.q9.angles.join('°、')}°`,
         correctAnswer: ANSWER_KEY.q9.label,
         explain: ANSWER_KEY.q9.explain
       };
 
-      // Q10 對答
-      const q10Clean = cleanStr(userAnswers.q10);
-      const isQ10Correct = (q10Clean === '115');
+      // Q10 對答 (115 / 一百一十五)
+      const isQ10Correct = (cleanNum(userAnswers.q10) === '115');
       questionResults.q10 = {
         correct: isQ10Correct,
         studentAnswer: userAnswers.q10 ? userAnswers.q10 + ' 度' : '(未作答)',
@@ -1474,10 +1479,14 @@
         explain: ANSWER_KEY.q10.explain
       };
 
-      // Q11 對答
-      const q11Clean = cleanStr(userAnswers.q11);
-      const isQ11Correct = (q11Clean === '21');
+      // Q11 對答 (21 / 二十一)
+      const isQ11Correct = (cleanNum(userAnswers.q11) === '21');
       questionResults.q11 = {
+        correct: isQ11Correct,
+        studentAnswer: userAnswers.q11 ? userAnswers.q11 + ' 公分' : '(未作答)',
+        correctAnswer: ANSWER_KEY.q11.label,
+        explain: ANSWER_KEY.q11.explain
+      };
         correct: isQ11Correct,
         studentAnswer: userAnswers.q11 ? userAnswers.q11 + ' 公分' : '(未作答)',
         correctAnswer: ANSWER_KEY.q11.label,
