@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>教師管理後台｜四年級三角形測驗 錯題比例與數據分析資料庫</title>
+  <!-- 引入 Chart.js 用於繪製高品質統計長條圖 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --accent: #f59e0b;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --neutral-50: #f8fafc;
+      --neutral-100: #f1f5f9;
+      --neutral-200: #e2e8f0;
+      --neutral-300: #cbd5e1;
+      --neutral-700: #334155;
+      --neutral-800: #1e293b;
+      --neutral-900: #0f172a;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      color: var(--neutral-900);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* 頂部導航列 */
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: 0 4px 12px rgba(15,23,42,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-light {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+    .btn-light:hover { background: rgba(255, 255, 255, 0.25); }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-success {
+      background: #16a34a;
+      color: white;
+    }
+    .btn-success:hover { background: #15803d; }
+
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+
+    /* 主要容器 */
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    /* 頂部概覽指標卡 */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--neutral-200);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--primary);
+    }
+    .metric-card.danger::before { background: var(--danger); }
+    .metric-card.success::before { background: var(--success); }
+    .metric-card.accent::before { background: var(--accent); }
+
+    .metric-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--neutral-700);
+    }
+
+    .metric-val {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--neutral-900);
+      line-height: 1.1;
+    }
+
+    .metric-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* 兩欄排版區塊 */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 1px solid var(--neutral-200);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid var(--neutral-100);
+    }
+
+    .panel-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--neutral-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 錯題排行榜列表 */
+    .mistake-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mistake-item {
+      background: var(--neutral-50);
+      border: 1.5px solid var(--neutral-200);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .mistake-item:hover {
+      background: #f8fafc;
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .mistake-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .q-tag {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--neutral-800);
+    }
+
+    .rate-badge {
+      font-weight: 900;
+      font-size: 0.92rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .rate-high { background: var(--danger-light); color: var(--danger); border: 1px solid #fca5a5; }
+    .rate-med { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .rate-low { background: var(--success-light); color: var(--success); border: 1px solid #86efac; }
+
+    .rate-bar-bg {
+      height: 9px;
+      background: var(--neutral-200);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .rate-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* 題目診斷展開卡片 */
+    .diagnosis-box {
+      margin-top: 14px;
+      padding: 14px;
+      background: white;
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--neutral-300);
+      font-size: 0.92rem;
+    }
+
+    /* 學生紀錄表格 */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 14px;
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+      background: white;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: var(--neutral-700);
+      border-bottom: 2px solid var(--neutral-200);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--neutral-200);
+      white-space: nowrap;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .q-matrix-dot {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      text-align: center;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 900;
+      margin-right: 3px;
+    }
+    .q-matrix-dot.correct { background: #dcfce7; color: #15803d; }
+    .q-matrix-dot.wrong { background: #fee2e2; color: #dc2626; }
+
+    /* 設定面板 Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+
+    .modal-card h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      color: var(--neutral-900);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: var(--neutral-800);
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--neutral-300);
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+
+    code-block {
+      display: block;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-family: monospace;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導航列 -->
+  <header>
+    <div class="header-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>四年級數學・三角形測驗 教師後台資料庫</span>
+    </div>
+    <div class="header-nav">
+      <button class="btn btn-light" onclick="openCloudModal()">
+        ⚙️ 雲端資料庫設定
+      </button>
+      <button class="btn btn-light" onclick="seedSampleData()">
+        🎲 產生全班模擬數據 (測試用)
+      </button>
+      <button class="btn btn-success" onclick="exportCSV()">
+        📥 匯出 Excel / CSV
+      </button>
+      <a href="index.html" class="btn btn-light" target="_blank">
+        📱 開啟學生測驗卷 ↗
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- 頂部概覽指標 -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">已繳卷學生人數</div>
+        <div class="metric-val" id="totalSubmissions">0</div>
+        <div class="metric-sub">全班應考人數約 28 人</div>
+      </div>
+      <div class="metric-card accent">
+        <div class="metric-label">全班平均成績</div>
+        <div class="metric-val" id="avgScore">0.0</div>
+        <div class="metric-sub">滿分 100 分</div>
+      </div>
+      <div class="metric-card success">
+        <div class="metric-label">及格率 (≥60分)</div>
+        <div class="metric-val" id="passRate">0%</div>
+        <div class="metric-sub" id="passCountSub">0 人及格</div>
+      </div>
+      <div class="metric-card danger">
+        <div class="metric-label">錯題率最高題號</div>
+        <div class="metric-val" id="topMistakeQ">--</div>
+        <div class="metric-sub" id="topMistakeRateSub">錯誤率 0%</div>
+      </div>
+    </section>
+
+    <!-- 錯題比例排行榜 & 長條統計圖 -->
+    <section class="analytics-grid">
+      <!-- 左欄：錯題比例圖表 -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            各題錯題比例長條分佈圖
+          </div>
+          <span style="font-size:0.85rem; color:#64748b; font-weight:700;">（紅色越高代表越多人寫錯）</span>
+        </div>
+        <div style="position: relative; height: 320px;">
+          <canvas id="mistakeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 右欄：錯題比例排序列表 -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            錯題比例排行榜 (錯誤率由高到低)
+          </div>
+          <span style="font-size:0.85rem; color:#64748b;">點擊查看診斷</span>
+        </div>
+        <div class="mistake-list" id="mistakeRankList">
+          <!-- 動態渲染各題錯題率卡片 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 單題深入診斷與常見錯誤面板 -->
+    <section class="panel" style="margin-bottom: 24px;" id="qDetailSection">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span id="detailTitle">點擊上方題號查看「單題錯題診斷與常犯錯誤」</span>
+        </div>
+      </div>
+      <div id="detailContent" style="color: #64748b; font-size: 0.95rem;">
+        請點擊上方排行榜中的任一題目，即可在此查看全班學生在該題的錯誤答案統計、題目原圖與解析！
+      </div>
+    </section>
+
+    <!-- 學生作答總表 -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          學生作答紀錄清單
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="filterInput" placeholder="搜尋姓名或座號..." oninput="renderTable()" style="padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--neutral-300); font-size: 0.85rem;">
+          <button class="btn btn-danger" style="padding:6px 12px; font-size:0.85rem;" onclick="clearDatabase()">清空紀錄</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>座號</th>
+              <th>姓名</th>
+              <th>班級</th>
+              <th>分數</th>
+              <th>答對題數</th>
+              <th>各題正誤矩陣 (Q1 ~ Q11)</th>
+              <th>繳卷時間</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <!-- 動態渲染學生紀錄 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- 雲端資料庫設定 Modal -->
+  <div class="modal-backdrop" id="cloudModal">
+    <div class="modal-card">
+      <h3>⚙️ 雲端資料庫與同步設定</h3>
+      <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">
+        讓全班所有學生的 iPad 在點擊送出後，能自動即時彙整到同一個雲端資料庫！
+      </p>
+
+      <div class="form-group">
+        <label>同步模式選擇：</label>
+        <select id="dbSyncType" onchange="toggleSyncFields()">
+          <option value="sheets">Google 試算表 (Google Apps Script API) - 推薦！免開新帳號</option>
+          <option value="firebase">Firebase Realtime Database (即時毫秒同步)</option>
+          <option value="local">純本機 LocalStorage (單機測試/演示模式)</option>
+        </select>
+      </div>
+
+      <div id="sheetsFields">
+        <div class="form-group">
+          <label>Google Apps Script Web App URL：</label>
+          <input type="text" id="sheetsUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        <details style="margin-top: 10px; font-size: 0.88rem; color: #475569;">
+          <summary style="cursor: pointer; font-weight: 700; color: #2563eb;">點我查看 Google 試算表 3 步驟串接教學（超簡單）</summary>
+          <ol style="margin: 8px 0 0 20px; line-height: 1.6;">
+            <li>開啟一個空白 Google 試算表，點選「擴充功能」→「Apps Script」。</li>
+            <li>把下面的程式碼複製並貼上，覆蓋原有內容：</li>
+          </ol>
+          <code-block>function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["繳卷時間", "班級", "座號", "姓名", "得分", "答對題數", "作答詳細JSON"]);
+  }
+  sheet.appendRow([
+    new Date(),
+    data.className,
+    data.seatNumber,
+    data.studentName,
+    data.score,
+    data.correctCount,
+    JSON.stringify(data.questionResults)
+  ]);
+  return ContentService.createTextOutput(JSON.stringify({status: "ok"})).setMimeType(ContentService.MimeType.JSON);
+}</code-block>
+          <ol start="3" style="margin: 8px 0 0 20px; line-height: 1.6;">
+            <li>點右上角「部署」→「新部署作業」→ 齒輪選擇「網頁應用程式」，將「誰可以存取」改為<strong>「任何人」</strong>，點「部署」後複製產生的網址貼回此處！</li>
+          </ol>
+        </details>
+      </div>
+
+      <div id="firebaseFields" style="display: none;">
+        <div class="form-group">
+          <label>Firebase Realtime Database URL：</label>
+          <input type="text" id="firebaseUrl" placeholder="https://your-project-id-default-rtdb.firebaseio.com">
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b;">
+          Firebase 控制台建立 Realtime Database 後，將 Rules 設為 <code>".read": true, ".write": true</code> 即可跨所有學生 iPad 即時同步！
+        </p>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+        <button class="btn btn-light" style="color:#333;" onclick="closeCloudModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveCloudConfig()">儲存設定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 學生個人作答詳細 Modal -->
+  <div class="modal-backdrop" id="studentDetailModal">
+    <div class="modal-card">
+      <h3 id="modalStudentName">學生作答明細</h3>
+      <div id="modalStudentContent"></div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn btn-primary" onclick="closeStudentModal()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DB_KEY = 'triangle_quiz_records_v1';
+    const CONFIG_KEY = 'triangle_quiz_cloud_config';
+    let records = [];
+    let mistakeChartInstance = null;
+
+    // 11 題的題目簡介
+    const Q_TITLES = {
+      q1: 'Q1: 正三角形頂角∠☆幾度？(60°)',
+      q2: 'Q2: 線段排成什麼三角形？(等腰)',
+      q3: 'Q3: 哪些是等腰三角形打勾？(①③)',
+      q4: 'Q4: 等腰三角形有幾條邊、幾個角相等？(2, 2)',
+      q5: 'Q5: 正三角形又稱等邊，幾角幾邊？(等邊, 3, 3)',
+      q6: 'Q6: 正三角形的3條邊長是？(③ 7,7,7cm)',
+      q7: 'Q7: 兩等長邊所夾的角稱？(頂角)',
+      q8: 'Q8: 剪紙展開是什麼三角形？(③等腰)',
+      q9: 'Q9: 4cm邊長三角形與各角幾度？(正/等邊, 60,60,60)',
+      q10: 'Q10: 等腰三角形∠丙外角幾度？(115°)',
+      q11: 'Q11: 等腰三角形周長是多少？(21cm)'
+    };
+
+    // 初始化加載
+    window.addEventListener('DOMContentLoaded', () => {
+      loadRecords();
+      initChart();
+      calculateStats();
+      renderTable();
+    });
+
+    // 載入資料庫
+    function loadRecords() {
+      try {
+        const raw = localStorage.getItem(DB_KEY);
+        records = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        records = [];
+      }
+    }
+
+    // 計算各項統計指標與錯題比例
+    function calculateStats() {
+      const total = records.length;
+      document.getElementById('totalSubmissions').textContent = total;
+
+      if (total === 0) {
+        document.getElementById('avgScore').textContent = '0.0';
+        document.getElementById('passRate').textContent = '0%';
+        document.getElementById('passCountSub').textContent = '0 人及格';
+        document.getElementById('topMistakeQ').textContent = '--';
+        document.getElementById('topMistakeRateSub').textContent = '無作答資料';
+        document.getElementById('mistakeRankList').innerHTML = '<div style="color:#64748b; padding:12px;">目前尚未有學生繳卷，可點擊上方「🎲 產生全班模擬數據」進行測試！</div>';
+        updateChart([], []);
+        return;
+      }
+
+      // 總分與及格
+      const sumScore = records.reduce((acc, r) => acc + (r.score || 0), 0);
+      const avg = (sumScore / total).toFixed(1);
+      document.getElementById('avgScore').textContent = avg;
+
+      const passCount = records.filter(r => (r.score || 0) >= 60).length;
+      const passPct = Math.round((passCount / total) * 100);
+      document.getElementById('passRate').textContent = passPct + '%';
+      document.getElementById('passCountSub').textContent = `${passCount} 人及格 / ${total - passCount} 人待加強`;
+
+      // 計算各題錯題比例
+      const qStats = [];
+      for (let i = 1; i <= 11; i++) {
+        const qKey = 'q' + i;
+        let wrongCount = 0;
+        const answerDist = {}; // 錯誤答案分佈統計
+
+        records.forEach(r => {
+          const res = r.questionResults?.[qKey];
+          if (!res || !res.correct) {
+            wrongCount++;
+            const ansStr = res?.studentAnswer || '(未填)';
+            answerDist[ansStr] = (answerDist[ansStr] || 0) + 1;
+          }
+        });
+
+        const mistakeRate = Math.round((wrongCount / total) * 100);
+        qStats.push({
+          qKey,
+          qIndex: i,
+          title: Q_TITLES[qKey],
+          wrongCount,
+          mistakeRate,
+          correctRate: 100 - mistakeRate,
+          answerDist
+        });
+      }
+
+      // 依錯誤率從高到低排序
+      const sortedByMistake = [...qStats].sort((a, b) => b.mistakeRate - a.mistakeRate);
+      const topQ = sortedByMistake[0];
+      document.getElementById('topMistakeQ').textContent = 'Q' + topQ.qIndex;
+      document.getElementById('topMistakeRateSub').textContent = `錯誤率 ${topQ.mistakeRate}% (${topQ.wrongCount}人答錯)`;
+
+      // 渲染排行榜卡片
+      renderMistakeRankList(sortedByMistake);
+
+      // 更新長條圖（依題目順序 Q1 ~ Q11）
+      const labels = qStats.map(q => 'Q' + q.qIndex);
+      const rates = qStats.map(q => q.mistakeRate);
+      updateChart(labels, rates);
+    }
+
+    // 渲染錯題排行榜
+    function renderMistakeRankList(sortedList) {
+      const container = document.getElementById('mistakeRankList');
+      container.innerHTML = sortedList.map((item, rank) => {
+        let badgeClass = 'rate-low';
+        let barColor = '#10b981';
+        if (item.mistakeRate >= 50) {
+          badgeClass = 'rate-high';
+          barColor = '#ef4444';
+        } else if (item.mistakeRate >= 25) {
+          badgeClass = 'rate-med';
+          barColor = '#f59e0b';
+        }
+
+        return `
+          <div class="mistake-item" onclick="showQuestionDetail('${item.qKey}')">
+            <div class="mistake-item-header">
+              <span class="q-tag">#${rank + 1} 題號 Q${item.qIndex}：${item.title.split('：')[0]}</span>
+              <span class="rate-badge ${badgeClass}">錯題率 ${item.mistakeRate}% (${item.wrongCount}人)</span>
+            </div>
+            <div class="rate-bar-bg">
+              <div class="rate-bar-fill" style="width: ${item.mistakeRate}%; background: ${barColor};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 顯示單題深入診斷與常見錯誤
+    function showQuestionDetail(qKey) {
+      const qIndex = parseInt(qKey.replace('q', ''));
+      const total = records.length;
+      let wrongCount = 0;
+      const answerDist = {};
+      let correctAnswerTxt = '';
+      let explainTxt = '';
+
+      records.forEach(r => {
+        const res = r.questionResults?.[qKey];
+        if (res) {
+          correctAnswerTxt = res.correctAnswer;
+          explainTxt = res.explain;
+          if (!res.correct) {
+            wrongCount++;
+            const ansStr = res.studentAnswer || '(未填)';
+            answerDist[ansStr] = (answerDist[ansStr] || 0) + 1;
+          }
+        }
+      });
+
+      const mistakeRate = total > 0 ? Math.round((wrongCount / total) * 100) : 0;
+      document.getElementById('detailTitle').textContent = `深入診斷：${Q_TITLES[qKey]}`;
+
+      // 產生常見錯誤答案條目
+      const distList = Object.entries(answerDist).sort((a,b) => b[1] - a[1]);
+      let distHtml = '<div style="margin-top: 10px;"><strong>學生常見錯誤答案分析：</strong><ul style="margin: 6px 0 0 20px;">';
+      if (distList.length === 0) {
+        distHtml += '<li>無學生寫錯，太棒了！</li>';
+      } else {
+        distList.forEach(([ans, count]) => {
+          const pct = Math.round((count / total) * 100);
+          distHtml += `<li>填寫「<span style="color:#b91c1c; font-weight:800;">${ans}</span>」：共有 <strong>${count}</strong> 位學生 (${pct}%)</li>`;
+        });
+      }
+      distHtml += '</ul></div>';
+
+      document.getElementById('detailContent').innerHTML = `
+        <div style="background: var(--neutral-50); padding: 16px; border-radius: 8px; border: 1.5px solid var(--neutral-200);">
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 10px;">
+            <span class="rate-badge ${mistakeRate > 40 ? 'rate-high' : 'rate-low'}" style="font-size: 1rem;">
+              錯誤率：${mistakeRate}% (${wrongCount} / ${total} 人)
+            </span>
+            <span style="font-weight: 800; color: #15803d; align-self: center;">
+              ✓ 參考正解：${correctAnswerTxt}
+            </span>
+          </div>
+          <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 10px;">
+            💡 <strong>題目觀念解析：</strong>${explainTxt}
+          </div>
+          ${distHtml}
+        </div>
+      `;
+
+      // 滾動至診斷面板
+      document.getElementById('qDetailSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 初始化 Chart.js
+    function initChart() {
+      const ctx = document.getElementById('mistakeChart').getContext('2d');
+      mistakeChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11'],
+          datasets: [{
+            label: '各題錯誤率 (%)',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            backgroundColor: function(context) {
+              const val = context.raw || 0;
+              if (val >= 50) return '#ef4444';
+              if (val >= 25) return '#f59e0b';
+              return '#10b981';
+            },
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { callback: v => v + '%' }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` 錯誤率: ${ctx.raw}%`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChart(labels, data) {
+      if (!mistakeChartInstance) return;
+      mistakeChartInstance.data.labels = labels;
+      mistakeChartInstance.data.datasets[0].data = data;
+      mistakeChartInstance.update();
+    }
+
+    // 渲染學生名單表格
+    function renderTable() {
+      const filter = (document.getElementById('filterInput')?.value || '').trim().toLowerCase();
+      const tbody = document.getElementById('studentTableBody');
+
+      const filtered = records.filter(r => {
+        if (!filter) return true;
+        return (r.studentName && r.studentName.toLowerCase().includes(filter)) ||
+               (String(r.seatNumber).includes(filter));
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#64748b;">暫無學生作答資料</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((r, idx) => {
+        // 生成 Q1 ~ Q11 矩陣點
+        let matrixHtml = '';
+        for (let i = 1; i <= 11; i++) {
+          const qKey = 'q' + i;
+          const isCorrect = r.questionResults?.[qKey]?.correct;
+          matrixHtml += `<span class="q-matrix-dot ${isCorrect ? 'correct' : 'wrong'}" title="Q${i}: ${isCorrect ? '對' : '錯'}">${i}</span>`;
+        }
+
+        const scoreColor = (r.score >= 80) ? '#15803d' : (r.score >= 60 ? '#1d4ed8' : '#dc2626');
+        const timeStr = r.submittedAt ? new Date(r.submittedAt).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' }) : '--';
+
+        return `
+          <tr>
+            <td style="font-weight: 800;">${r.seatNumber} 號</td>
+            <td style="font-weight: 700;">${r.studentName}</td>
+            <td>四年${r.className || '402'}班</td>
+            <td style="font-size: 1.15rem; font-weight: 900; color: ${scoreColor};">${r.score} 分</td>
+            <td style="font-weight: 700;">${r.correctCount} / 11 題</td>
+            <td>${matrixHtml}</td>
+            <td style="color:#64748b; font-size:0.85rem;">${timeStr}</td>
+            <td>
+              <button class="btn btn-light" style="padding:4px 10px; font-size:0.8rem; color:#1e40af;" onclick="viewStudentModal(${idx})">查看考卷</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 查看個別學生作答 Modal
+    function viewStudentModal(idx) {
+      const student = records[idx];
+      if (!student) return;
+
+      document.getElementById('modalStudentName').textContent = `📄 ${student.seatNumber} 號 ${student.studentName} 的答卷明細（得分：${student.score} 分）`;
+
+      let html = '<div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">';
+      for (let i = 1; i <= 11; i++) {
+        const qKey = 'q' + i;
+        const res = student.questionResults?.[qKey];
+        if (!res) continue;
+
+        html += `
+          <div style="background: ${res.correct ? '#f0fdf4' : '#fef2f2'}; border: 1px solid ${res.correct ? '#bbf7d0' : '#fecaca'}; border-radius: 8px; padding: 10px 14px;">
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:0.95rem;">
+              <span>${Q_TITLES[qKey]}</span>
+              <span style="color: ${res.correct ? '#16a34a' : '#dc2626'};">${res.correct ? '✓ 答對' : '✗ 答錯'}</span>
+            </div>
+            <div style="margin-top:4px; font-size:0.88rem;">
+              <strong>學生回答：</strong><span style="color:#1e293b;">${res.studentAnswer}</span> |
+              <strong>參考正解：</strong><span style="color:#15803d;">${res.correctAnswer}</span>
+            </div>
+          </div>
+        `;
+      }
+      html += '</div>';
+
+      document.getElementById('modalStudentContent').innerHTML = html;
+      document.getElementById('studentDetailModal').style.display = 'flex';
+    }
+
+    function closeStudentModal() {
+      document.getElementById('studentDetailModal').style.display = 'none';
+    }
+
+    // 產生模擬全班 28 人數據（方便老師立刻看圖表呈現效果）
+    function seedSampleData() {
+      const names = [
+        "陳冠宇", "林子涵", "黃柏翰", "張祐齊", "李承諺", "王品睿", "劉宇恩", "吳柏廷",
+        "蔡侑霖", "楊晴雯", "許恩齊", "鄭詠晴", "謝睿恩", "郭又瑄", "邱禹丞", "曾亮宇",
+        "廖宥翔", "徐子晴", "賴品妤", "周宥廷", "葉晨曦", "蘇柏安", "莊子誼", "江佩璇",
+        "呂宗翰", "何明哲", "羅翊瑄", "高晨恩"
+      ];
+
+      const newRecords = [];
+      names.forEach((name, i) => {
+        const seatNumber = (i + 1).toString().padStart(2, '0');
+        const qResults = {};
+        let score = 0;
+        let correctCount = 0;
+
+        // 模擬各題錯誤機率：國小生常在 Q8(摺紙等腰)、Q10(等腰補角115°)、Q7(頂角名詞) 犯錯
+        const errorRates = {
+          q1: 0.1,  // 60度較簡單
+          q2: 0.15, // 等腰
+          q3: 0.25, // 勾選
+          q4: 0.2,  // 2邊2角
+          q5: 0.2,  // 等邊3角3邊
+          q6: 0.1,  // 7,7,7
+          q7: 0.45, // 常寫成底角
+          q8: 0.60, // 常寫成等腰直角
+          q9: 0.2,  // 正/60
+          q10: 0.55,// 常算成 65度 或 180-65算錯
+          q11: 0.25 // 周長加法
+        };
+
+        for (let q = 1; q <= 11; q++) {
+          const qKey = 'q' + q;
+          const isError = Math.random() < errorRates[qKey];
+          const isCorrect = !isError;
+          if (isCorrect) {
+            correctCount++;
+            score += (q === 11 ? 10 : 9);
+          }
+
+          let wrongAns = '寫錯';
+          if (qKey === 'q8') wrongAns = '④ 等腰直角三角形';
+          else if (qKey === 'q10') wrongAns = '65 度';
+          else if (qKey === 'q7') wrongAns = '底角';
+          else if (qKey === 'q3') wrongAns = '①、② 打勾';
+
+          qResults[qKey] = {
+            correct: isCorrect,
+            studentAnswer: isCorrect ? '正確回答' : wrongAns,
+            correctAnswer: '正解',
+            explain: '觀念說明'
+          };
+        }
+        if (correctCount === 11) score = 100;
+
+        newRecords.push({
+          className: '402',
+          seatNumber,
+          studentName: name,
+          score,
+          correctCount,
+          wrongCount: 11 - correctCount,
+          submittedAt: new Date(Date.now() - (28 - i) * 60000).toISOString(),
+          questionResults: qResults
+        });
+      });
+
+      records = newRecords;
+      localStorage.setItem(DB_KEY, JSON.stringify(records));
+      calculateStats();
+      renderTable();
+      alert('已成功產生 28 位四年級學生的模擬作答數據！請檢視各題錯題比例長條圖與排行榜！');
+    }
+
+    // 匯出 CSV (Excel 可直接開啟)
+    function exportCSV() {
+      if (records.length === 0) {
+        alert('目前無作答紀錄可供匯出！');
+        return;
+      }
+
+      let csv = '\uFEFF座號,姓名,班級,總分,答對數,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,Q10,Q11,繳卷時間\n';
+      records.forEach(r => {
+        let qStatus = [];
+        for (let i = 1; i <= 11; i++) {
+          qStatus.push(r.questionResults?.['q' + i]?.correct ? 'O' : 'X');
+        }
+        csv += `"${r.seatNumber}","${r.studentName}","${r.className}","${r.score}","${r.correctCount}",` +
+               qStatus.map(s => `"${s}"`).join(',') +
+               `,"${r.submittedAt || ''}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `四年級三角形測驗_錯題成績報表_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 清空資料庫
+    function clearDatabase() {
+      if (confirm('確定要清空所有學生的測驗紀錄嗎？此動作無法復原！')) {
+        records = [];
+        localStorage.removeItem(DB_KEY);
+        calculateStats();
+        renderTable();
+      }
+    }
+
+    // 雲端設定 Modal 操作
+    function openCloudModal() {
+      const configRaw = localStorage.getItem(CONFIG_KEY);
+      if (configRaw) {
+        try {
+          const cfg = JSON.parse(configRaw);
+          document.getElementById('dbSyncType').value = cfg.type || 'sheets';
+          if (cfg.url) document.getElementById('sheetsUrl').value = cfg.url;
+          if (cfg.databaseUrl) document.getElementById('firebaseUrl').value = cfg.databaseUrl;
+        } catch(e) {}
+      }
+      toggleSyncFields();
+      document.getElementById('cloudModal').style.display = 'flex';
+    }
+
+    function closeCloudModal() {
+      document.getElementById('cloudModal').style.display = 'none';
+    }
+
+    function toggleSyncFields() {
+      const type = document.getElementById('dbSyncType').value;
+      document.getElementById('sheetsFields').style.display = (type === 'sheets') ? 'block' : 'none';
+      document.getElementById('firebaseFields').style.display = (type === 'firebase') ? 'block' : 'none';
+    }
+
+    function saveCloudConfig() {
+      const type = document.getElementById('dbSyncType').value;
+      const config = {
+        type,
+        url: document.getElementById('sheetsUrl').value.trim(),
+        databaseUrl: document.getElementById('firebaseUrl').value.trim()
+      };
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+      closeCloudModal();
+      alert('雲端資料庫設定已儲存！');
+    }
+  </script>
+</body>
+</html>
