@@ -815,19 +815,23 @@
             <span class="q-type-tag">填空題</span>
           </div>
         </div>
-        <div class="diagram-container">
-          <svg width="260" height="200" viewBox="0 0 260 200">
-            <!-- 正三角形 -->
-            <polygon points="130,25 35,175 225,175" fill="#eff6ff" stroke="#1d4ed8" stroke-width="4" stroke-linejoin="round"/>
-            <!-- 頂角 ☆ 標記 -->
-            <path d="M110,60 A30,30 0 0,0 150,60" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
-            <text x="130" y="80" font-size="22" font-weight="bold" fill="#d97706" text-anchor="middle">☆</text>
-            <!-- 左下角 60° -->
-            <path d="M55,160 A30,30 0 0,0 75,175" fill="none" stroke="#2563eb" stroke-width="2"/>
-            <text x="75" y="160" font-size="16" font-weight="bold" fill="#1e3a8a">60°</text>
-            <!-- 右下角 60° -->
-            <path d="M185,175 A30,30 0 0,0 205,160" fill="none" stroke="#2563eb" stroke-width="2"/>
-            <text x="160" y="160" font-size="16" font-weight="bold" fill="#1e3a8a">60°</text>
+        <div class="diagram-container" style="background:#ffffff; border:1px solid #cbd5e1;">
+          <svg width="260" height="210" viewBox="0 0 260 210">
+            <!-- 正三角形 (純黑線白底) -->
+            <polygon points="130,22 45,178 215,178" fill="#ffffff" stroke="#000000" stroke-width="2.8" stroke-linejoin="round"/>
+            
+            <!-- 頂角 60° (帶圓弧) -->
+            <path d="M 117,46 A 28,28 0 0,0 143,46" fill="none" stroke="#000000" stroke-width="2"/>
+            <text x="130" y="75" font-size="26" font-family="-apple-system, sans-serif" font-weight="bold" fill="#000000" text-anchor="middle">60°</text>
+            
+            <!-- 左下角 60° (帶圓弧) -->
+            <path d="M 68,178 A 25,25 0 0,0 58,154" fill="none" stroke="#000000" stroke-width="2"/>
+            <text x="92" y="162" font-size="26" font-family="-apple-system, sans-serif" font-weight="bold" fill="#000000">60°</text>
+            
+            <!-- 右下角 ☆ (帶圓弧與黑邊白底空心五角星) -->
+            <path d="M 202,154 A 25,25 0 0,0 192,178" fill="none" stroke="#000000" stroke-width="2"/>
+            <!-- 空心五角星 -->
+            <polygon points="168,136 172,147 183,147 174,154 178,165 168,158 158,165 162,154 153,147 164,147" fill="#ffffff" stroke="#000000" stroke-width="2.2" stroke-linejoin="round"/>
           </svg>
         </div>
         <div class="input-row">
@@ -882,31 +886,50 @@
           </div>
         </div>
         <div class="checkbox-cards-grid">
-          <!-- 圖 1: 等腰銳角三角形 -->
+          <!-- 圖 1: 鈍角等腰三角形 (兩腰 4cm, 底邊 6cm) -->
           <div class="check-card" id="q3_card_1" onclick="toggleCheckbox('q3_1')">
             <span class="check-label">圖形 ①</span>
-            <svg width="140" height="110" viewBox="0 0 140 110">
-              <polygon points="70,15 25,95 115,95" fill="#f0fdf4" stroke="#16a34a" stroke-width="3.5" stroke-linejoin="round"/>
+            <svg width="150" height="110" viewBox="0 0 150 110">
+              <!-- 三角形灰底黑邊 -->
+              <polygon points="75,22 18,80 132,80" fill="#cbd5e1" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+              <!-- 左腰邊長 4cm -->
+              <text x="32" y="45" font-size="13" font-weight="bold" fill="#1e293b">4cm</text>
+              <!-- 右腰邊長 4cm -->
+              <text x="100" y="45" font-size="13" font-weight="bold" fill="#1e293b">4cm</text>
+              <!-- 底邊長 6cm -->
+              <text x="75" y="98" font-size="13" font-weight="bold" fill="#1e293b" text-anchor="middle">6cm</text>
             </svg>
             <div class="check-box-indicator" id="indicator_q3_1">✓</div>
           </div>
 
-          <!-- 圖 2: 不等邊直角三角形 -->
+          <!-- 圖 2: 不等邊直角三角形 (邊長 3cm, 4cm, 5cm) -->
           <div class="check-card" id="q3_card_2" onclick="toggleCheckbox('q3_2')">
             <span class="check-label">圖形 ②</span>
-            <svg width="140" height="110" viewBox="0 0 140 110">
-              <polygon points="30,15 30,95 125,95" fill="#f8fafc" stroke="#475569" stroke-width="3" stroke-linejoin="round"/>
-              <!-- 直角記號 -->
-              <polyline points="30,80 45,80 45,95" fill="none" stroke="#64748b" stroke-width="2"/>
+            <svg width="150" height="110" viewBox="0 0 150 110">
+              <!-- 三角形淺灰底黑邊 (頂部水平，右邊垂直，斜邊向左下) -->
+              <polygon points="25,18 120,18 120,95" fill="#f1f5f9" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+              <!-- 頂邊長 3cm -->
+              <text x="72" y="14" font-size="13" font-weight="bold" fill="#1e293b" text-anchor="middle">3cm</text>
+              <!-- 右側垂直邊長 4cm -->
+              <text x="135" y="62" font-size="13" font-weight="bold" fill="#1e293b" text-anchor="middle">4cm</text>
+              <!-- 斜邊長 5cm -->
+              <text x="58" y="68" font-size="13" font-weight="bold" fill="#1e293b">5cm</text>
             </svg>
             <div class="check-box-indicator" id="indicator_q3_2">✓</div>
           </div>
 
-          <!-- 圖 3: 等腰鈍角三角形 -->
+          <!-- 圖 3: 長尖角等腰三角形 (左底 2cm, 上下兩腰各 7cm) -->
           <div class="check-card" id="q3_card_3" onclick="toggleCheckbox('q3_3')">
             <span class="check-label">圖形 ③</span>
-            <svg width="140" height="110" viewBox="0 0 140 110">
-              <polygon points="60,40 10,95 130,95" fill="#f0fdf4" stroke="#16a34a" stroke-width="3.5" stroke-linejoin="round"/>
+            <svg width="150" height="110" viewBox="0 0 150 110">
+              <!-- 三角形純白底黑邊 (左邊垂直底邊，向右伸出長頂角) -->
+              <polygon points="18,20 18,78 138,49" fill="#ffffff" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+              <!-- 左側底邊 2cm -->
+              <text x="8" y="53" font-size="13" font-weight="bold" fill="#1e293b">2cm</text>
+              <!-- 上腰長 7cm -->
+              <text x="78" y="30" font-size="13" font-weight="bold" fill="#1e293b">7cm</text>
+              <!-- 下腰長 7cm -->
+              <text x="78" y="76" font-size="13" font-weight="bold" fill="#1e293b">7cm</text>
             </svg>
             <div class="check-box-indicator" id="indicator_q3_3">✓</div>
           </div>
