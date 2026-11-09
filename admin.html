@@ -418,7 +418,7 @@
       <div class="metric-card">
         <div class="metric-label">已繳卷學生人數</div>
         <div class="metric-val" id="totalSubmissions">0</div>
-        <div class="metric-sub">全班應考人數約 28 人</div>
+        <div class="metric-sub">全班應考人數 29 人</div>
       </div>
       <div class="metric-card accent">
         <div class="metric-label">全班平均成績</div>
@@ -486,10 +486,10 @@
       <div class="panel-header">
         <div class="panel-title">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          學生作答紀錄清單
+          學生作答紀錄清單 (1~29號)
         </div>
         <div style="display: flex; gap: 8px;">
-          <input type="text" id="filterInput" placeholder="搜尋姓名或座號..." oninput="renderTable()" style="padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--neutral-300); font-size: 0.85rem;">
+          <input type="text" id="filterInput" placeholder="搜尋座號 (例: 05)..." oninput="renderTable()" style="padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--neutral-300); font-size: 0.85rem;">
           <button class="btn btn-danger" style="padding:6px 12px; font-size:0.85rem;" onclick="clearDatabase()">清空紀錄</button>
         </div>
       </div>
@@ -499,8 +499,6 @@
           <thead>
             <tr>
               <th>座號</th>
-              <th>姓名</th>
-              <th>班級</th>
               <th>分數</th>
               <th>答對題數</th>
               <th>各題正誤矩陣 (Q1 ~ Q11)</th>
@@ -845,14 +843,16 @@
 
       const filtered = records.filter(r => {
         if (!filter) return true;
-        return (r.studentName && r.studentName.toLowerCase().includes(filter)) ||
-               (String(r.seatNumber).includes(filter));
+        return String(r.seatNumber).includes(filter);
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#64748b;">暫無學生作答資料</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b;">暫無學生作答資料</td></tr>';
         return;
       }
+
+      // 按座號由小到大排序
+      filtered.sort((a, b) => parseInt(a.seatNumber || 0) - parseInt(b.seatNumber || 0));
 
       tbody.innerHTML = filtered.map((r, idx) => {
         // 生成 Q1 ~ Q11 矩陣點
@@ -868,9 +868,7 @@
 
         return `
           <tr>
-            <td style="font-weight: 800;">${r.seatNumber} 號</td>
-            <td style="font-weight: 700;">${r.studentName}</td>
-            <td>四年${r.className || '402'}班</td>
+            <td style="font-size: 1.15rem; font-weight: 900; color: #1e3a8a;">${r.seatNumber} 號</td>
             <td style="font-size: 1.15rem; font-weight: 900; color: ${scoreColor};">${r.score} 分</td>
             <td style="font-weight: 700;">${r.correctCount} / 11 題</td>
             <td>${matrixHtml}</td>
@@ -888,7 +886,7 @@
       const student = records[idx];
       if (!student) return;
 
-      document.getElementById('modalStudentName').textContent = `📄 ${student.seatNumber} 號 ${student.studentName} 的答卷明細（得分：${student.score} 分）`;
+      document.getElementById('modalStudentName').textContent = `📄 ${student.seatNumber} 號學生的答卷明細（得分：${student.score} 分）`;
 
       let html = '<div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">';
       for (let i = 1; i <= 11; i++) {
@@ -919,18 +917,11 @@
       document.getElementById('studentDetailModal').style.display = 'none';
     }
 
-    // 產生模擬全班 28 人數據（方便老師立刻看圖表呈現效果）
+    // 產生模擬全班 29 人數據（方便老師立刻看圖表呈現效果）
     function seedSampleData() {
-      const names = [
-        "陳冠宇", "林子涵", "黃柏翰", "張祐齊", "李承諺", "王品睿", "劉宇恩", "吳柏廷",
-        "蔡侑霖", "楊晴雯", "許恩齊", "鄭詠晴", "謝睿恩", "郭又瑄", "邱禹丞", "曾亮宇",
-        "廖宥翔", "徐子晴", "賴品妤", "周宥廷", "葉晨曦", "蘇柏安", "莊子誼", "江佩璇",
-        "呂宗翰", "何明哲", "羅翊瑄", "高晨恩"
-      ];
-
       const newRecords = [];
-      names.forEach((name, i) => {
-        const seatNumber = (i + 1).toString().padStart(2, '0');
+      for (let i = 1; i <= 29; i++) {
+        const seatNumber = i.toString().padStart(2, '0');
         const qResults = {};
         let score = 0;
         let correctCount = 0;
@@ -977,20 +968,20 @@
         newRecords.push({
           className: '402',
           seatNumber,
-          studentName: name,
+          studentName: `${seatNumber} 號`,
           score,
           correctCount,
           wrongCount: 11 - correctCount,
-          submittedAt: new Date(Date.now() - (28 - i) * 60000).toISOString(),
+          submittedAt: new Date(Date.now() - (30 - i) * 60000).toISOString(),
           questionResults: qResults
         });
-      });
+      }
 
       records = newRecords;
       localStorage.setItem(DB_KEY, JSON.stringify(records));
       calculateStats();
       renderTable();
-      alert('已成功產生 28 位四年級學生的模擬作答數據！請檢視各題錯題比例長條圖與排行榜！');
+      alert('已成功產生 29 位學生的模擬作答數據！請檢視各題錯題比例長條圖與排行榜！');
     }
 
     // 匯出 CSV (Excel 可直接開啟)

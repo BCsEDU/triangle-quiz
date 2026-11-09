@@ -124,7 +124,7 @@
     .student-card {
       background: white;
       border-radius: var(--radius-lg);
-      padding: 18px 20px;
+      padding: 16px 22px;
       margin-bottom: 22px;
       box-shadow: var(--shadow-sm);
       border: 2px solid var(--neutral-200);
@@ -137,7 +137,7 @@
     .student-card .card-title {
       font-weight: 800;
       color: var(--primary-dark);
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -153,40 +153,31 @@
     .field-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: var(--neutral-50);
-      padding: 6px 12px;
+      padding: 10px 18px;
       border-radius: var(--radius-md);
-      border: 1.5px solid var(--neutral-300);
+      border: 2px solid var(--primary-border);
+      flex: 1;
+      max-width: 360px;
     }
 
     .field-group label {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--neutral-700);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--neutral-800);
       white-space: nowrap;
     }
 
-    .field-group input {
+    .field-group select {
       border: none;
       background: transparent;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--neutral-900);
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--primary);
       outline: none;
       width: 100%;
-    }
-
-    .field-group input[name="seatNumber"] {
-      width: 50px;
-      text-align: center;
-    }
-    .field-group input[name="studentName"] {
-      width: 110px;
-    }
-    .field-group input[name="className"] {
-      width: 70px;
-      text-align: center;
+      cursor: pointer;
     }
 
     /* 試卷進度列 */
@@ -726,23 +717,44 @@
     <!-- 學生個人資訊填寫 -->
     <section class="student-card" id="studentInfoSection">
       <div class="card-title">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         學生身分
       </div>
       <div class="student-fields">
         <div class="field-group">
-          <label for="className">班級：四年</label>
-          <input type="text" id="className" name="className" value="402" placeholder="402" inputmode="numeric">
-          <span>班</span>
-        </div>
-        <div class="field-group">
           <label for="seatNumber">座號：</label>
-          <input type="number" id="seatNumber" name="seatNumber" min="1" max="50" placeholder="01" inputmode="numeric">
-          <span>號</span>
-        </div>
-        <div class="field-group" style="flex: 1; min-width: 140px;">
-          <label for="studentName">姓名：</label>
-          <input type="text" id="studentName" name="studentName" placeholder="請輸入姓名">
+          <select id="seatNumber" name="seatNumber">
+            <option value="">-- 請點選你的座號 (1~29) --</option>
+            <option value="01">01 號</option>
+            <option value="02">02 號</option>
+            <option value="03">03 號</option>
+            <option value="04">04 號</option>
+            <option value="05">05 號</option>
+            <option value="06">06 號</option>
+            <option value="07">07 號</option>
+            <option value="08">08 號</option>
+            <option value="09">09 號</option>
+            <option value="10">10 號</option>
+            <option value="11">11 號</option>
+            <option value="12">12 號</option>
+            <option value="13">13 號</option>
+            <option value="14">14 號</option>
+            <option value="15">15 號</option>
+            <option value="16">16 號</option>
+            <option value="17">17 號</option>
+            <option value="18">18 號</option>
+            <option value="19">19 號</option>
+            <option value="20">20 號</option>
+            <option value="21">21 號</option>
+            <option value="22">22 號</option>
+            <option value="23">23 號</option>
+            <option value="24">24 號</option>
+            <option value="25">25 號</option>
+            <option value="26">26 號</option>
+            <option value="27">27 號</option>
+            <option value="28">28 號</option>
+            <option value="29">29 號</option>
+          </select>
         </div>
       </div>
     </section>
@@ -1342,11 +1354,11 @@
     // -------------------------------------------------------------
     function submitQuiz() {
       const seat = document.getElementById('seatNumber')?.value.trim();
-      const name = document.getElementById('studentName')?.value.trim();
-      const className = document.getElementById('className')?.value.trim() || '402';
+      const name = seat ? `${seat} 號` : '';
+      const className = '402';
 
-      if (!seat || !name) {
-        alert('請先在最上方填寫「座號」與「姓名」再繳卷喔！');
+      if (!seat) {
+        alert('請先在最上方選擇你的「座號 (1~29號)」再繳卷喔！');
         document.getElementById('studentInfoSection').scrollIntoView({ behavior: 'smooth' });
         return;
       }
@@ -1614,17 +1626,16 @@
       }
     }
 
-    // 初始化自動還原姓名座號
+    // 初始化自動還原座號
     window.addEventListener('DOMContentLoaded', () => {
       const lastSeat = localStorage.getItem('last_seat_number');
-      const lastName = localStorage.getItem('last_student_name');
-      if (lastSeat) document.getElementById('seatNumber').value = lastSeat;
-      if (lastName) document.getElementById('studentName').value = lastName;
+      if (lastSeat) {
+        const sel = document.getElementById('seatNumber');
+        if (sel) sel.value = lastSeat;
+      }
 
-      ['seatNumber', 'studentName'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', (e) => {
-          localStorage.setItem('last_' + (id === 'seatNumber' ? 'seat_number' : 'student_name'), e.target.value);
-        });
+      document.getElementById('seatNumber')?.addEventListener('change', (e) => {
+        localStorage.setItem('last_seat_number', e.target.value);
       });
     });
   </script>
