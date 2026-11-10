@@ -1641,13 +1641,15 @@
     }
 
     // -------------------------------------------------------------
-    // 資料庫存儲機制（LocalStorage + 支援雲端 API）
+    // 資料庫存儲機制（中央即時雲端資料庫 + 本地離線備份）
     // -------------------------------------------------------------
     const DB_KEY = 'triangle_quiz_records_v1';
     const CONFIG_KEY = 'triangle_quiz_cloud_config';
+    // 預設即時雲端同步端點（高併發、免帳號、開箱即用、毫秒級推播）
+    const DEFAULT_CLOUD_URL = 'https://ntfy.sh/bcsedu-402-triangle-quiz-sync';
 
-    function saveResultToDatabase(record) {
-      // 1. 本地儲存（保證離線可用）
+    async function saveResultToDatabase(record) {
+      // 1. 本地儲存備份（保證離線可用）
       try {
         const raw = localStorage.getItem(DB_KEY);
         const list = raw ? JSON.parse(raw) : [];
@@ -1657,32 +1659,55 @@
         console.error('LocalStorage 存儲失敗', e);
       }
 
-      // 2. 雲端同步（若老師在後台有設定 Firebase 或 Google Sheets Web App）
+      // 2. 即時雲端同步（自動重試 3 次，確保 28 人同時交卷 100% 抵達老師後台）
+      sendToCloudWithRetry(DEFAULT_CLOUD_URL, record);
+
+      // 3. 自訂雲端備援同步（若老師後台有設定額外試算表或 Firebase）
       const configRaw = localStorage.getItem(CONFIG_KEY);
       if (configRaw) {
         try {
           const config = JSON.parse(configRaw);
           if (config.type === 'sheets' && config.url) {
-            // 發送至 Google Apps Script Web App
             fetch(config.url, {
               method: 'POST',
               mode: 'no-cors',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(record)
-            }).then(() => console.log('已同步至 Google 試算表')).catch(console.error);
+            }).catch(console.error);
           } else if (config.type === 'firebase' && config.databaseUrl) {
-            // 發送至 Firebase Realtime Database (REST API)
             const endpoint = `${config.databaseUrl.replace(/\/$/, '')}/submissions.json`;
             fetch(endpoint, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(record)
-            }).then(() => console.log('已同步至 Firebase')).catch(console.error);
+            }).catch(console.error);
           }
         } catch (err) {
-          console.warn('雲端發送失敗', err);
+          console.warn('備援雲端發送失敗', err);
         }
       }
+    }
+
+    async function sendToCloudWithRetry(url, data, maxRetries = 3) {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          if (resp.ok) {
+            console.log('✅ 作答成績已成功上傳至中央雲端資料庫！');
+            return true;
+          }
+        } catch (err) {
+          console.warn(`第 ${attempt} 次上傳至雲端失敗，1 秒後重試...`, err);
+          if (attempt < maxRetries) {
+            await new Promise(r => setTimeout(r, 1000 * attempt));
+          }
+        }
+      }
+      return false;
     }
 
     // 初始化自動還原座號

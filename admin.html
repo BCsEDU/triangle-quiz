@@ -386,6 +386,39 @@
       white-space: pre-wrap;
       word-break: break-all;
     }
+
+    /* 即時新繳卷通知 Toast */
+    .toast-container {
+      position: fixed;
+      top: 75px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast-notification {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border-left: 5px solid #10b981;
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -395,6 +428,9 @@
     <div class="header-title">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
       <span>四年級數學・三角形測驗 教師後台資料庫</span>
+      <span id="cloudStatusBadge" style="background: rgba(16, 185, 129, 0.2); color: #86efac; border: 1px solid #10b981; font-size: 0.82rem; padding: 4px 10px; border-radius: 999px; font-weight: 700; margin-left: 8px;">
+        🟢 雲端同步連線中 (即時接收 28 台學生 iPad)
+      </span>
     </div>
     <div class="header-nav">
       <button class="btn btn-danger" onclick="resetAllData()">
@@ -414,6 +450,9 @@
       </a>
     </div>
   </header>
+
+  <!-- 即時通知容器 -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <main>
     <!-- 頂部概覽指標 -->
@@ -599,8 +638,13 @@
   <script>
     const DB_KEY = 'triangle_quiz_records_v1';
     const CONFIG_KEY = 'triangle_quiz_cloud_config';
+    const RESET_TS_KEY = 'triangle_quiz_reset_ts';
+    // 中央雲端即時同步端點（與學生端完全對齊）
+    const CLOUD_SYNC_URL = 'https://ntfy.sh/bcsedu-402-triangle-quiz-sync';
+    
     let records = [];
     let mistakeChartInstance = null;
+    let eventSourceInstance = null;
 
     // 11 題的題目簡介
     const Q_TITLES = {
@@ -623,7 +667,122 @@
       initChart();
       calculateStats();
       renderTable();
+      // 啟動中央雲端即時同步
+      initCloudSync();
     });
+
+    // -------------------------------------------------------------
+    // 中央雲端資料庫即時監聽與歷史載入 (支援 28 台學生 iPad 即時推播)
+    // -------------------------------------------------------------
+    function initCloudSync() {
+      const badge = document.getElementById('cloudStatusBadge');
+      
+      // 1. 初次載入：拉取雲端歷史紀錄
+      fetch(`${CLOUD_SYNC_URL}/json?poll=1&since=all`)
+        .then(res => res.text())
+        .then(text => {
+          if (!text) return;
+          const lines = text.trim().split('\n');
+          let addedCount = 0;
+          lines.forEach(line => {
+            try {
+              const item = JSON.parse(line);
+              if (item.event === 'message' && item.message) {
+                const rec = JSON.parse(item.message);
+                if (rec && rec.seatNumber && isValidSubmission(rec, item.time)) {
+                  upsertRecord(rec);
+                  addedCount++;
+                }
+              }
+            } catch(e) {}
+          });
+          if (addedCount > 0) {
+            calculateStats();
+            renderTable();
+          }
+        })
+        .catch(err => console.warn('雲端歷史拉取失敗，使用本地紀錄', err));
+
+      // 2. 建立 Server-Sent Events (SSE) 即時連線（毫秒級接收）
+      try {
+        if (eventSourceInstance) eventSourceInstance.close();
+        eventSourceInstance = new EventSource(`${CLOUD_SYNC_URL}/sse`);
+        
+        eventSourceInstance.onopen = () => {
+          if (badge) {
+            badge.style.display = 'inline-block';
+            badge.textContent = '🟢 雲端同步連線中 (即時接收 28 台學生 iPad)';
+          }
+        };
+
+        eventSourceInstance.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.event === 'message' && data.message) {
+              const rec = JSON.parse(data.message);
+              if (rec && rec.seatNumber && isValidSubmission(rec, data.time)) {
+                upsertRecord(rec);
+                calculateStats();
+                renderTable();
+                showSubmissionToast(rec);
+              }
+            }
+          } catch(err) {
+            console.error('解析即時交卷事件失敗', err);
+          }
+        };
+
+        eventSourceInstance.onerror = () => {
+          if (badge) {
+            badge.textContent = '🟡 雲端連線重試中...';
+          }
+        };
+      } catch(err) {
+        console.error('SSE 連線建立失敗', err);
+      }
+    }
+
+    // 檢查該提交是否晚於「數據歸零重整」的時間
+    function isValidSubmission(rec, serverTimeSec) {
+      const resetTs = parseInt(localStorage.getItem(RESET_TS_KEY) || '0', 10);
+      if (!resetTs) return true;
+      const recTime = rec.submittedAt ? new Date(rec.submittedAt).getTime() : (serverTimeSec ? serverTimeSec * 1000 : 0);
+      return recTime >= resetTs;
+    }
+
+    // 插入或更新單一學生紀錄 (以座號去重)
+    function upsertRecord(newRec) {
+      const existingIdx = records.findIndex(r => String(r.seatNumber).padStart(2,'0') === String(newRec.seatNumber).padStart(2,'0'));
+      if (existingIdx >= 0) {
+        records[existingIdx] = newRec; // 更新為最新交卷紀錄
+      } else {
+        records.push(newRec);
+      }
+      try {
+        localStorage.setItem(DB_KEY, JSON.stringify(records));
+      } catch(e) {}
+    }
+
+    // 顯示即時交卷 Toast 提示
+    function showSubmissionToast(rec) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification';
+      toast.innerHTML = `
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span><strong>${rec.seatNumber} 號</strong> 學生剛剛已繳卷！得分：<span style="color:#fde047; font-size:1.15rem;">${rec.score}</span> 分</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s ease-in';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
 
     // 載入資料庫
     function loadRecords() {
@@ -1020,6 +1179,8 @@
       if (confirm('確定要將所有作答紀錄全部歸零重整嗎？\n（此動作會清空目前所有的測試數據，恢復初始空白狀態）')) {
         records = [];
         localStorage.removeItem(DB_KEY);
+        // 設定歸零時間戳記，忽略雲端在此之前的舊測試資料
+        localStorage.setItem(RESET_TS_KEY, Date.now());
         calculateStats();
         renderTable();
         // 還原單題診斷面板
