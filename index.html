@@ -694,6 +694,197 @@
       vertical-align: middle;
       margin-left: 6px;
     }
+
+    /* 學生登入歡迎卡片 */
+    .login-container {
+      max-width: 540px;
+      margin: 32px auto;
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+      border: 3px solid #93c5fd;
+      text-align: center;
+      animation: fadeInDown 0.35s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-badge-tag {
+      display: inline-block;
+      background: #eff6ff;
+      color: #1e3a8a;
+      padding: 6px 18px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border: 1.5px solid #bfdbfe;
+      margin-bottom: 14px;
+    }
+
+    .login-icon-box {
+      font-size: 3.5rem;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .login-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .login-subtitle {
+      font-size: 1.05rem;
+      color: #475569;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .login-form-box {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      text-align: left;
+    }
+
+    .login-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: white;
+      border-radius: var(--radius-sm);
+      border: 2px solid #cbd5e1;
+    }
+
+    .login-info-row .info-label {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .login-info-row .info-val {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .login-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .login-field-group label {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #1e293b;
+    }
+
+    .login-seat-select {
+      width: 100%;
+      height: 58px;
+      padding: 10px 16px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #0f172a;
+      background: white;
+      border: 3px solid #2563eb;
+      border-radius: 12px;
+      outline: none;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+      transition: all 0.2s;
+    }
+
+    .login-seat-select:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
+    }
+
+    .start-quiz-btn {
+      margin-top: 6px;
+      width: 100%;
+      height: 62px;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
+      transition: all 0.15s;
+    }
+
+    .start-quiz-btn:active {
+      transform: scale(0.97);
+    }
+
+    .login-note {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #64748b;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* 測驗中學生狀態列 */
+    .active-student-bar {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 14px 22px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+      border: 2px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .active-student-info {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-change-seat {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1.5px solid #cbd5e1;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-change-seat:active {
+      transform: scale(0.96);
+    }
   </style>
 </head>
 <body>
@@ -710,17 +901,23 @@
   </header>
 
   <main>
-    <!-- 學生個人資訊填寫 -->
-    <section class="student-card" id="studentInfoSection">
-      <div class="card-title">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        學生身分
-      </div>
-      <div class="student-fields">
-        <div class="field-group">
-          <label for="seatNumber">座號：</label>
-          <select id="seatNumber" name="seatNumber">
-            <option value="">-- 請點選你的座號 (1~29) --</option>
+    <!-- 學生登入歡迎畫面 (進入測驗前) -->
+    <section class="login-container" id="loginScreen">
+      <div class="login-badge-tag">🏫 屏東縣潮和國小 402 班</div>
+      <div class="login-icon-box">📐</div>
+      <h2 class="login-title">國小四年級數學・第六單元 三角形</h2>
+      <p class="login-subtitle">活動 2：以邊分類三角形（隨堂測驗卷）</p>
+
+      <div class="login-form-box">
+        <div class="login-info-row">
+          <span class="info-label">班級：</span>
+          <span class="info-val">四年二班 (402)</span>
+        </div>
+
+        <div class="login-field-group">
+          <label for="loginSeatSelect">請點選你的座號：</label>
+          <select id="loginSeatSelect" class="login-seat-select">
+            <option value="">-- 請點我選擇座號 (1~29) --</option>
             <option value="01">01 號</option>
             <option value="02">02 號</option>
             <option value="03">03 號</option>
@@ -752,8 +949,26 @@
             <option value="29">29 號</option>
           </select>
         </div>
+
+        <button type="button" class="start-quiz-btn" onclick="startQuiz()">
+          <span>開始進行測驗</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <p class="login-note">✨ 不用輸入姓名，直接選好座號即可開始作答！</p>
       </div>
     </section>
+
+    <!-- 測驗主畫面區塊 (登入後顯示) -->
+    <div id="quizMainSection" style="display: none;">
+      <!-- 學生當前身分橫條 -->
+      <div class="active-student-bar">
+        <div class="active-student-info">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>考生身分：<strong>四年二班 <span id="displaySeatNum" style="color:#2563eb;">--</span> 號</strong></span>
+        </div>
+        <button type="button" class="btn-change-seat" onclick="returnToLogin()">🔄 更換座號</button>
+      </div>
 
     <!-- 作答進度列 -->
     <div class="progress-bar-container">
@@ -1184,6 +1399,7 @@
       </button>
       <div class="submit-hint" id="submitHint">請確認每一題都已作答，送出後會立即自動為你對答案喔！</div>
     </div>
+  </div> <!-- 結束 quizMainSection -->
   </main>
 
   <script>
@@ -1263,6 +1479,8 @@
     };
 
     // 狀態暫存
+    let currentStudentSeat = '';
+
     const userAnswers = {
       q1: '',
       q2: '',
@@ -1276,6 +1494,40 @@
       q10: '',
       q11: ''
     };
+
+    // 登入進入測驗
+    function startQuiz() {
+      const sel = document.getElementById('loginSeatSelect');
+      const seat = (sel?.value || '').trim();
+      if (!seat) {
+        alert('請先點選你的座號 (1~29號) 再開始測驗喔！');
+        sel.focus();
+        return;
+      }
+      currentStudentSeat = seat;
+      try {
+        localStorage.setItem('last_seat_number', seat);
+      } catch(e) {}
+
+      // 更新測驗狀態列
+      document.getElementById('displaySeatNum').textContent = seat;
+
+      // 切換畫面：隱藏登入卡片，顯示測驗區塊
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('quizMainSection').style.display = 'block';
+
+      // 滾動至頂部
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 更換座號
+    function returnToLogin() {
+      if (confirm('確定要更換座號嗎？已填寫的答案會先為你保留。')) {
+        document.getElementById('quizMainSection').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
 
     // 快捷填入輔助
     function setInputValue(elemId, val) {
@@ -1377,22 +1629,25 @@
       return numMap[str] || str;
     }
 
+    // 文字清理輔助（專用於名詞填空題：等邊、頂角、正三角形等，保留文字結構並去除標點與空格）
     function cleanStr(s) {
       if (!s) return '';
-      return String(s).replace(/[度°公分cm條個邊角\s]/g, '').trim().toLowerCase();
+      return String(s).trim().replace(/[\s，。、,.（）()]/g, '').toLowerCase();
     }
 
     // -------------------------------------------------------------
     // 送出測驗與自動對答批改
     // -------------------------------------------------------------
     function submitQuiz() {
-      const seat = document.getElementById('seatNumber')?.value.trim();
+      const seat = currentStudentSeat || document.getElementById('loginSeatSelect')?.value.trim();
       const name = seat ? `${seat} 號` : '';
-      const className = '402';
+      const className = '402'; // 四年二班
 
       if (!seat) {
-        alert('請先在最上方選擇你的「座號 (1~29號)」再繳卷喔！');
-        document.getElementById('studentInfoSection').scrollIntoView({ behavior: 'smooth' });
+        alert('請先在登入畫面選擇你的「座號 (1~29號)」再繳卷喔！');
+        document.getElementById('quizMainSection').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
@@ -1710,15 +1965,15 @@
       return false;
     }
 
-    // 初始化自動還原座號
+    // 初始化自動還原登入座號
     window.addEventListener('DOMContentLoaded', () => {
       const lastSeat = localStorage.getItem('last_seat_number');
       if (lastSeat) {
-        const sel = document.getElementById('seatNumber');
+        const sel = document.getElementById('loginSeatSelect');
         if (sel) sel.value = lastSeat;
       }
 
-      document.getElementById('seatNumber')?.addEventListener('change', (e) => {
+      document.getElementById('loginSeatSelect')?.addEventListener('change', (e) => {
         localStorage.setItem('last_seat_number', e.target.value);
       });
     });
